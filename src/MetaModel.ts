@@ -216,7 +216,7 @@ export interface Element  extends Extensible, Annotatable, CommonMetadata  {
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -435,7 +435,7 @@ export interface SchemaDefinition  extends Element  {
     /**
      * size in bytes of the source of the schema
      */
-    source_file_size?: string,
+    source_file_size?: number,
     
     
     /**
@@ -447,7 +447,7 @@ export interface SchemaDefinition  extends Element  {
     /**
      * if true then induced/mangled slot names are not created for class_usage and attributes
      */
-    slot_names_unique?: string,
+    slot_names_unique?: boolean,
     
     
     /**
@@ -531,7 +531,7 @@ export interface SchemaDefinition  extends Element  {
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -672,19 +672,19 @@ export interface TypeExpression  extends Expression  {
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -747,19 +747,19 @@ export interface AnonymousTypeExpression  extends TypeExpression  {
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -846,19 +846,19 @@ export interface TypeDefinition  extends Element, TypeExpression  {
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -960,7 +960,7 @@ export interface TypeDefinition  extends Element, TypeExpression  {
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -1149,7 +1149,7 @@ export interface SubsetDefinition  extends Element  {
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -1272,13 +1272,13 @@ export interface Definition  extends Element  {
     /**
      * an abstract class is a high level class or slot that is typically used to group common slots together and cannot be directly instantiated.
      */
-    abstract?: string,
+    abstract?: boolean,
     
     
     /**
      * this slot or class can only be used as a mixin.
      */
-    mixin?: string,
+    mixin?: boolean,
     
     
     /**
@@ -1413,7 +1413,7 @@ For example, a Measurement class may have 3 fields: unit, value, and string_valu
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -1632,7 +1632,7 @@ export interface EnumDefinition  extends Element  {
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -1899,7 +1899,7 @@ export interface PathExpression  extends Expression, Extensible, Annotatable, Co
     /**
      * true if the slot is to be inversed
      */
-    reversed?: string,
+    reversed?: boolean,
     
     
     /**
@@ -2049,25 +2049,25 @@ implicitly asserts Y is an instance of C2
     /**
      * true means that the slot must be present in the loaded definition
      */
-    required?: string,
+    required?: boolean,
     
     
     /**
      * true means that the slot should be present in the loaded definition, but this is not required
      */
-    recommended?: string,
+    recommended?: boolean,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -2097,7 +2097,7 @@ implicitly asserts Y is an instance of C2
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
@@ -2109,13 +2109,13 @@ implicitly asserts Y is an instance of C2
     /**
      * the minimum number of entries for a multivalued slot
      */
-    minimum_cardinality?: string,
+    minimum_cardinality?: number,
     
     
     /**
      * the maximum number of entries for a multivalued slot
      */
-    maximum_cardinality?: string,
+    maximum_cardinality?: number,
     
     
     /**
@@ -2132,7 +2132,7 @@ E.g to state that all members of a list are between 1 and 10
 ```
 all_members:
   x:
-    range: integer
+    range: number
     minimum_value: 10
     maximum_value: 10
 ```
@@ -2197,25 +2197,25 @@ implicitly asserts Y is an instance of C2
     /**
      * true means that the slot must be present in the loaded definition
      */
-    required?: string,
+    required?: boolean,
     
     
     /**
      * true means that the slot should be present in the loaded definition, but this is not required
      */
-    recommended?: string,
+    recommended?: boolean,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -2245,7 +2245,7 @@ implicitly asserts Y is an instance of C2
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
@@ -2257,13 +2257,13 @@ implicitly asserts Y is an instance of C2
     /**
      * the minimum number of entries for a multivalued slot
      */
-    minimum_cardinality?: string,
+    minimum_cardinality?: number,
     
     
     /**
      * the maximum number of entries for a multivalued slot
      */
-    maximum_cardinality?: string,
+    maximum_cardinality?: number,
     
     
     /**
@@ -2280,7 +2280,7 @@ E.g to state that all members of a list are between 1 and 10
 ```
 all_members:
   x:
-    range: integer
+    range: number
     minimum_value: 10
     maximum_value: 10
 ```
@@ -2453,13 +2453,13 @@ implicitly asserts that X is an instance of C1
     /**
      * true means that slot can have more than one value
      */
-    multivalued?: string,
+    multivalued?: boolean,
     
     
     /**
      * true means that the *value* of a slot is inherited by subclasses
      */
-    inherited?: string,
+    inherited?: boolean,
     
     
     /**
@@ -2473,7 +2473,7 @@ implicitly asserts that X is an instance of C1
 linkml.utils.ifabsent_functions.default_library:
   * [Tt]rue -- boolean True
   * [Ff]alse -- boolean False
-  * int(value) -- integer value
+  * int(value) -- number value
   * str(value) -- string value
   * default_range -- schema default range
   * bnode -- blank node identifier
@@ -2487,31 +2487,31 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * True means that keyed or identified slot appears in an outer structure by value.  False means that only the key or identifier for the slot appears within the domain, referencing a structure that appears elsewhere.
      */
-    inlined?: string,
+    inlined?: boolean,
     
     
     /**
      * True means that an inlined slot is represented as a list of range instances.  False means that an inlined slot is represented as a dictionary, whose key is the slot key or identifier and whose value is the range instance.
      */
-    inlined_as_list?: string,
+    inlined_as_list?: boolean,
     
     
     /**
      * True means that the key slot(s) uniquely identify the container.
      */
-    key?: string,
+    key?: boolean,
     
     
     /**
      * True means that the key slot(s) uniquely identify the container. There can be at most one identifier or key per container
      */
-    identifier?: string,
+    identifier?: boolean,
     
     
     /**
      * True means that the key slot(s) is used to determine the instantiation (types) relation between objects and a ClassDefinition
      */
-    designates_type?: string,
+    designates_type?: boolean,
     
     
     /**
@@ -2541,37 +2541,37 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * If s is symmetric, and i.s=v, then v.s=i
      */
-    symmetric?: string,
+    symmetric?: boolean,
     
     
     /**
      * If s is reflexive, then i.s=i for all instances i
      */
-    reflexive?: string,
+    reflexive?: boolean,
     
     
     /**
      * If s is locally_reflexive, then i.s=i for all instances i where s if a class slot for the type of i
      */
-    locally_reflexive?: string,
+    locally_reflexive?: boolean,
     
     
     /**
      * If s is irreflexive, then there exists no i such i.s=i
      */
-    irreflexive?: string,
+    irreflexive?: boolean,
     
     
     /**
      * If s is antisymmetric, and i.s=v where i is different from v, v.s cannot have value i
      */
-    asymmetric?: string,
+    asymmetric?: boolean,
     
     
     /**
      * If s is transitive, and i.s=z, and s.s=j, then i.s=j
      */
-    transitive?: string,
+    transitive?: boolean,
     
     
     /**
@@ -2583,7 +2583,7 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * indicates that any instance, i,  the domain of this slot will include an assert of i s range
      */
-    is_class_field?: string,
+    is_class_field?: boolean,
     
     
     /**
@@ -2607,7 +2607,7 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * True means that this slot was defined in a slot_usage situation
      */
-    is_usage_slot?: string,
+    is_usage_slot?: boolean,
     
     
     /**
@@ -2631,7 +2631,7 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * true if this slot is a grouping slot
      */
-    is_grouping_slot?: string,
+    is_grouping_slot?: boolean,
     
     
     /**
@@ -2649,7 +2649,7 @@ linkml.utils.ifabsent_functions.default_library:
     /**
      * If true then all direct is_a children are mutually disjoint and share no instances in common
      */
-    children_are_mutually_disjoint?: string,
+    children_are_mutually_disjoint?: boolean,
     
     
     /**
@@ -2676,25 +2676,25 @@ implicitly asserts Y is an instance of C2
     /**
      * true means that the slot must be present in the loaded definition
      */
-    required?: string,
+    required?: boolean,
     
     
     /**
      * true means that the slot should be present in the loaded definition, but this is not required
      */
-    recommended?: string,
+    recommended?: boolean,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or higher than this
      */
-    minimum_value?: string,
+    minimum_value?: number,
     
     
     /**
      * for slots with ranges of type number, the value must be equal to or lowe than this
      */
-    maximum_value?: string,
+    maximum_value?: number,
     
     
     /**
@@ -2724,7 +2724,7 @@ implicitly asserts Y is an instance of C2
     /**
      * the slot must have range of a number and the value of the slot must equal the specified value
      */
-    equals_number?: string,
+    equals_number?: number,
     
     
     /**
@@ -2736,13 +2736,13 @@ implicitly asserts Y is an instance of C2
     /**
      * the minimum number of entries for a multivalued slot
      */
-    minimum_cardinality?: string,
+    minimum_cardinality?: number,
     
     
     /**
      * the maximum number of entries for a multivalued slot
      */
-    maximum_cardinality?: string,
+    maximum_cardinality?: number,
     
     
     /**
@@ -2759,7 +2759,7 @@ E.g to state that all members of a list are between 1 and 10
 ```
 all_members:
   x:
-    range: integer
+    range: number
     minimum_value: 10
     maximum_value: 10
 ```
@@ -2800,13 +2800,13 @@ all_members:
     /**
      * an abstract class is a high level class or slot that is typically used to group common slots together and cannot be directly instantiated.
      */
-    abstract?: string,
+    abstract?: boolean,
     
     
     /**
      * this slot or class can only be used as a mixin.
      */
-    mixin?: string,
+    mixin?: boolean,
     
     
     /**
@@ -2941,7 +2941,7 @@ For example, a Measurement class may have 3 fields: unit, value, and string_valu
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -3286,7 +3286,7 @@ export interface ClassDefinition  extends Definition, ClassExpression  {
     /**
      * indicator that this is the root class in tree structures
      */
-    tree_root?: string,
+    tree_root?: boolean,
     
     
     /**
@@ -3310,13 +3310,13 @@ export interface ClassDefinition  extends Definition, ClassExpression  {
     /**
      * if true then induced/mangled slot names are not created for class_usage and attributes
      */
-    slot_names_unique?: string,
+    slot_names_unique?: boolean,
     
     
     /**
      * true if this class represents a relationship rather than an entity
      */
-    represents_relationship?: string,
+    represents_relationship?: boolean,
     
     
     /**
@@ -3328,7 +3328,7 @@ export interface ClassDefinition  extends Definition, ClassExpression  {
     /**
      * If true then all direct is_a children are mutually disjoint and share no instances in common
      */
-    children_are_mutually_disjoint?: string,
+    children_are_mutually_disjoint?: boolean,
     
     
     /**
@@ -3370,13 +3370,13 @@ export interface ClassDefinition  extends Definition, ClassExpression  {
     /**
      * an abstract class is a high level class or slot that is typically used to group common slots together and cannot be directly instantiated.
      */
-    abstract?: string,
+    abstract?: boolean,
     
     
     /**
      * this slot or class can only be used as a mixin.
      */
-    mixin?: string,
+    mixin?: boolean,
     
     
     /**
@@ -3511,7 +3511,7 @@ For example, a Measurement class may have 3 fields: unit, value, and string_valu
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
@@ -3655,25 +3655,25 @@ export interface ClassRule  extends ClassLevelRule, Extensible, Annotatable, Com
     /**
      * in addition to preconditions entailing postconditions, the postconditions entail the preconditions
      */
-    bidirectional?: string,
+    bidirectional?: boolean,
     
     
     /**
      * if true, the the postconditions may be omitted in instance data, but it is valid for an inference engine to add these
      */
-    open_world?: string,
+    open_world?: boolean,
     
     
     /**
      * the relative order in which the element occurs, lower values are given precedence
      */
-    rank?: string,
+    rank?: number,
     
     
     /**
      * a deactivated rule is not executed by the rules engine
      */
-    deactivated?: string,
+    deactivated?: boolean,
     
     
     /**
@@ -3796,13 +3796,13 @@ export interface PatternExpression  extends Extensible, Annotatable, CommonMetad
     /**
      * if true then the pattern is first string interpolated
      */
-    interpolated?: string,
+    interpolated?: boolean,
     
     
     /**
      * if true then the pattern must match the whole string, as if enclosed in ^...$
      */
-    partial_match?: string,
+    partial_match?: boolean,
     
     
     /**

@@ -72,7 +72,7 @@ export interface Person  extends NamedThing, HasAliases  {
     /**
      * None
      */
-    age_in_years?: string,
+    age_in_years?: number,
     
     
     /**
@@ -273,25 +273,25 @@ export interface Event  {
     /**
      * None
      */
-    started_at_time?: string,
+    started_at_time?: date,
     
     
     /**
      * None
      */
-    ended_at_time?: string,
+    ended_at_time?: date,
     
     
     /**
      * None
      */
-    duration?: string,
+    duration?: number,
     
     
     /**
      * None
      */
-    is_current?: string,
+    is_current?: boolean,
     
 }
 
@@ -405,13 +405,13 @@ export interface Relationship  {
     /**
      * None
      */
-    started_at_time?: string,
+    started_at_time?: date,
     
     
     /**
      * None
      */
-    ended_at_time?: string,
+    ended_at_time?: date,
     
     
     /**
@@ -438,13 +438,13 @@ export interface FamilialRelationship  extends Relationship  {
     /**
      * None
      */
-    started_at_time?: string,
+    started_at_time?: date,
     
     
     /**
      * None
      */
-    ended_at_time?: string,
+    ended_at_time?: date,
     
     
     /**
@@ -477,25 +477,25 @@ export interface EmploymentEvent  extends Event  {
     /**
      * None
      */
-    started_at_time?: string,
+    started_at_time?: date,
     
     
     /**
      * None
      */
-    ended_at_time?: string,
+    ended_at_time?: date,
     
     
     /**
      * None
      */
-    duration?: string,
+    duration?: number,
     
     
     /**
      * None
      */
-    is_current?: string,
+    is_current?: boolean,
     
 }
 
@@ -528,25 +528,25 @@ export interface MedicalEvent  extends Event  {
     /**
      * None
      */
-    started_at_time?: string,
+    started_at_time?: date,
     
     
     /**
      * None
      */
-    ended_at_time?: string,
+    ended_at_time?: date,
     
     
     /**
      * None
      */
-    duration?: string,
+    duration?: number,
     
     
     /**
      * None
      */
-    is_current?: string,
+    is_current?: boolean,
     
 }
 
