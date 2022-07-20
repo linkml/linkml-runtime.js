@@ -1,3 +1,5 @@
+import path from 'path'
+
 import {SchemaDefinition} from "../index"
 import {SchemaView, TraversalOptions} from "../index"
 
@@ -55,6 +57,18 @@ describe('walk', function() {
         //expect(sv.class_ancestors(c.name, opts)).toEqual(["c1", "c2", "c3"]);
     });
 });
+
+describe('SchemaView Constructor', () => {
+    it('should accept an object', () => {
+        const view = new SchemaView(s);
+        expect(view.schema.name).toBe('x')
+    })
+    
+    it('should accept a path string', () => {
+        const view = new SchemaView(path.join(__dirname, 'inputs', 'kitchen_sink_noimports.yaml'))
+        expect(view.schema.name).toBe('kitchen_sink')
+    })
+})
 
 describe('schemaview', function() {
     let sv = new SchemaView(s)

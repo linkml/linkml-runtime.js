@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs'
+import { parse } from 'yaml'
 import {
     SchemaDefinition, Definition, ClassDefinition, SlotDefinition, ClassDefinitionName, SlotDefinitionName,
     EnumDefinition, TypeDefinition, EnumDefinitionName, TypeDefinitionName, Element
@@ -36,6 +38,13 @@ function _not_false(v) {
     return v == undefined || v == true
 }
 
+function loadSchema(path: string): SchemaDefinition {
+    const content = readFileSync(path, 'utf-8')
+    const schema: SchemaDefinition = parse(content)
+    schema.source_file = path
+    return schema
+}
+
 interface TraversalSpecificOptions {
     mixins?: boolean,
     is_a?: boolean,
@@ -59,8 +68,12 @@ export class SchemaView {
     schema: SchemaDefinition
     virtual_schema: SchemaDefinition
 
-    constructor(schema: SchemaDefinition) {
-        this.schema = schema
+    constructor(schema: SchemaDefinition | string) {
+        if (typeof schema === 'string') {
+            this.schema = loadSchema(schema)
+        } else {
+            this.schema = schema
+        }
         this._index()
     }
 
