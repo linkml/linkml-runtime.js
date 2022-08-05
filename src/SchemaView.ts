@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises'
 import { parse } from 'yaml'
 import {
     SchemaDefinition, Definition, ClassDefinition, SlotDefinition, ClassDefinitionName, SlotDefinitionName,
-    EnumDefinition, TypeDefinition, EnumDefinitionName, TypeDefinitionName, Element, SchemaDefinitionName
+    EnumDefinition, TypeDefinition, EnumDefinitionName, TypeDefinitionName, Element, SchemaDefinitionName, ElementName
 }
     from "./MetaModel";
 import Namespaces from './Namespaces';
@@ -77,6 +77,12 @@ interface WalkerOptions {
 
 export type TraversalOptions = TraversalSpecificOptions & ImportOptions
 
+const SLOTS = 'slots'
+const CLASSES = 'classes'
+const ENUMS = 'enums'
+const SUBSETS = 'subsets'
+const TYPES = 'types'
+
 /**
  * operations over schemas
  */
@@ -85,6 +91,7 @@ export class SchemaView {
     virtual_schema: SchemaDefinition
     schemaMap: Map<SchemaDefinitionName, SchemaDefinition>
     _namespaces: Namespaces
+    _elementBySchemaMap: Map<ElementName, SchemaDefinitionName>
 
     static async load(file: string) {
         const schema = await loadSchema(file)
@@ -364,6 +371,7 @@ export class SchemaView {
         return loadSchema(fileName, baseDir)
     }
 
+    // TODO: memoize
     async importsClosure(traverse = true, injectMetadata = true): Promise<SchemaDefinitionName[]> {
         if (!this.schemaMap) {
             this.schemaMap = new Map([[this.schema.name, this.schema]])
@@ -394,6 +402,46 @@ export class SchemaView {
             }
         }
         return closure
+    }
+
+    // TODO: memoize
+    async inSchema(elementName: ElementName): Promise<SchemaDefinitionName> {
+        const map = await this.elementBySchemaMap()
+        return map.get(elementName)
+    }
+
+    async elementBySchemaMap(): Promise<Map<ElementName, SchemaDefinitionName>> {
+        if (this._elementBySchemaMap) {
+            return this._elementBySchemaMap
+        }
+        const map = new Map()
+        const schemas = await this.allSchema(true)
+        for (const schema of schemas) {
+            for (const typeKey of [CLASSES, SLOTS, TYPES, ENUMS, SUBSETS]) {
+                if (schema[typeKey]) {
+                    for (const key of Object.keys(schema[typeKey])) {
+                        map.set(key, schema.name)
+                    }
+                }
+            }
+            if (schema.classes) {
+                for (const cls of Object.values(schema.classes)) {
+                    if (cls && cls.attributes) {
+                        for (const key of Object.keys(cls.attributes)) {
+                            map.set(key, schema.name)
+                        }
+                    }
+                }
+            }
+        }
+        this._elementBySchemaMap = map
+        return map
+    }
+
+    // TODO: this should be memoized
+    async allSchema(imports: boolean = true): Promise<SchemaDefinition[]> {
+        const schemaNames = await this.importsClosure(imports)
+        return schemaNames.map(name => this.schemaMap.get(name))
     }
 
     // DEPRECATED

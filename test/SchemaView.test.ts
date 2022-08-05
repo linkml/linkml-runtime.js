@@ -101,5 +101,11 @@ describe('SchemaView Imports', () => {
         const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
         const closure = await view.importsClosure()
         expect(closure).toEqual(['kitchen_sink', 'core', 'linkml:types'])
+
+        expect(await view.inSchema('Person')).toEqual('kitchen_sink')
+        expect(await view.inSchema('id')).toEqual('core')
+        expect(await view.inSchema('name')).toEqual('core')
+        expect(await view.inSchema('activity')).toEqual('core')
+        expect(await view.inSchema('string')).toEqual('types')
     })
 })
