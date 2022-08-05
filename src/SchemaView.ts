@@ -1,10 +1,13 @@
-import { readFileSync } from 'fs'
+import { readFile } from 'fs/promises'
 import { parse } from 'yaml'
 import {
     SchemaDefinition, Definition, ClassDefinition, SlotDefinition, ClassDefinitionName, SlotDefinitionName,
-    EnumDefinition, TypeDefinition, EnumDefinitionName, TypeDefinitionName, Element
+    EnumDefinition, TypeDefinition, EnumDefinitionName, TypeDefinitionName, Element, SchemaDefinitionName
 }
     from "./MetaModel";
+import Namespaces from './Namespaces';
+import path from 'path'
+import fetch from 'cross-fetch'
 
 export type Name = ClassDefinitionName | SlotDefinitionName
 
@@ -38,10 +41,23 @@ function _not_false(v) {
     return v == undefined || v == true
 }
 
-function loadSchema(path: string): SchemaDefinition {
-    const content = readFileSync(path, 'utf-8')
+async function loadSchema(file: string, baseDir: string | null = null): Promise<SchemaDefinition> {
+    const isRemote = /^https?:\/\//.test(file)
+    let content
+    if (isRemote) {
+        const response = await fetch(file)
+        if (!response.ok) {
+            throw new Error('Could not fetch: ' + file)
+        }
+        content = await response.text()
+    } else {
+        if (baseDir) {
+            file = path.join(baseDir, file)
+        }
+        content = await readFile(file, 'utf-8')
+    }
     const schema: SchemaDefinition = parse(content)
-    schema.source_file = path
+    schema.source_file = file
     return schema
 }
 
@@ -67,13 +83,17 @@ export type TraversalOptions = TraversalSpecificOptions & ImportOptions
 export class SchemaView {
     schema: SchemaDefinition
     virtual_schema: SchemaDefinition
+    schemaMap: Map<SchemaDefinitionName, SchemaDefinition>
+    _namespaces: Namespaces
 
-    constructor(schema: SchemaDefinition | string) {
-        if (typeof schema === 'string') {
-            this.schema = loadSchema(schema)
-        } else {
-            this.schema = schema
-        }
+    static async load(file: string) {
+        const schema = await loadSchema(file)
+        return new SchemaView(schema)
+    }
+
+    constructor(schema: SchemaDefinition) {
+        this.schema = schema
+        this.schemaMap = new Map([[this.schema.name, this.schema]])
         this._index()
     }
 
@@ -310,6 +330,70 @@ export class SchemaView {
         else {
             //throw 'Unknown range: ' + r + ' for slot: '+slot.name
         }
+    }
+
+    namespaces() {
+        if (this._namespaces) {
+            return this._namespaces
+        }
+        this._namespaces = new Namespaces()
+        for (const schema of this.schemaMap.values()) {
+            for (const [prefix, reference] of Object.entries(schema.prefixes)) {
+                this._namespaces.set(prefix, reference)
+            }
+        }
+        for (const cmap of this.schema.default_curi_maps) {
+            this._namespaces.addPrefixmap(cmap, false)
+        }
+        return this._namespaces
+    }
+
+    async loadImport(imp: string, fromSchema: SchemaDefinition = null): Promise<SchemaDefinition> {
+        if (!fromSchema) {
+            fromSchema = this.schema
+        }
+        let sname = imp
+        if (sname.includes(':')) {
+            sname = this.namespaces().uriFor(imp)
+        }
+        let fileName = sname + '.yaml'
+        let baseDir
+        if (fromSchema.source_file) {
+            baseDir = path.dirname(fromSchema.source_file)
+        }
+        return loadSchema(fileName, baseDir)
+    }
+
+    async importsClosure(traverse = true, injectMetadata = true): Promise<SchemaDefinitionName[]> {
+        if (!this.schemaMap) {
+            this.schemaMap = new Map([[this.schema.name, this.schema]])
+        }
+        const closure = []
+        const visited = new Set()
+        const todo = [this.schema.name]
+        if (!traverse) {
+            return todo
+        }
+        while (todo.length > 0) {
+            const schemaName = todo.pop()
+            visited.add(schemaName)
+            if (!this.schemaMap.has(schemaName)) {
+                const importedSchema = await this.loadImport(schemaName)
+                this.schemaMap.set(schemaName, importedSchema)
+            }
+            const schema = this.schemaMap.get(schemaName)
+            if (!closure.includes(schemaName)) {
+                closure.push(schemaName)
+            }
+            if (schema.imports) {
+                for (const i of schema.imports) {
+                    if (!visited.has(i)) {
+                        todo.push(i)
+                    }
+                }
+            }
+        }
+        return closure
     }
 
     // DEPRECATED

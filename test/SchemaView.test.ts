@@ -48,6 +48,9 @@ let s: SchemaDefinition =
         }
     };
 
+const SCHEMA_NO_IMPORTS = path.join(__dirname, 'inputs', 'kitchen_sink_noimports.yaml')
+const SCHEMA_WITH_IMPORTS = path.join(__dirname, 'inputs', 'kitchen_sink.yaml')
+
 describe('walk', function() {
     let sv = new SchemaView(s)
     let c = sv.get_class("c1")
@@ -63,9 +66,11 @@ describe('SchemaView Constructor', () => {
         const view = new SchemaView(s);
         expect(view.schema.name).toBe('x')
     })
-    
-    it('should accept a path string', () => {
-        const view = new SchemaView(path.join(__dirname, 'inputs', 'kitchen_sink_noimports.yaml'))
+})
+
+describe('SchemaView.load', () => {
+    it('should accept a path string', async () => {
+        const view = await SchemaView.load(SCHEMA_NO_IMPORTS)
         expect(view.schema.name).toBe('kitchen_sink')
     })
 })
@@ -90,3 +95,11 @@ describe('schemaview', function() {
     });
 
 });
+
+describe('SchemaView Imports', () => {
+    it('should return correct imports closure', async () => {
+        const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
+        const closure = await view.importsClosure()
+        expect(closure).toEqual(['kitchen_sink', 'core', 'linkml:types'])
+    })
+})
