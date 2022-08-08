@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "cross-fetch": "^3.1.5",
+    "moize": "^6.1.1",
     "rdflib": "^2.2.19",
     "yaml": "2.1.1"
   }

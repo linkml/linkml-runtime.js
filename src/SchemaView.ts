@@ -8,6 +8,7 @@ import {
 import Namespaces from './Namespaces';
 import path from 'path'
 import fetch from 'cross-fetch'
+import moize from 'moize'
 
 export type Name = ClassDefinitionName | SlotDefinitionName
 
@@ -91,7 +92,6 @@ export class SchemaView {
     virtual_schema: SchemaDefinition
     schemaMap: Map<SchemaDefinitionName, SchemaDefinition>
     _namespaces: Namespaces
-    _elementBySchemaMap: Map<ElementName, SchemaDefinitionName>
     modifications: number
 
     static async load(file: string) {
@@ -373,8 +373,7 @@ export class SchemaView {
         return loadSchema(fileName, baseDir)
     }
 
-    // TODO: memoize
-    async importsClosure(traverse = true, injectMetadata = true): Promise<SchemaDefinitionName[]> {
+    importsClosure = moize(async (traverse = true, injectMetadata = true): Promise<SchemaDefinitionName[]> => {
         if (!this.schemaMap) {
             this.schemaMap = new Map([[this.schema.name, this.schema]])
         }
@@ -404,18 +403,14 @@ export class SchemaView {
             }
         }
         return closure
-    }
+    })
 
-    // TODO: memoize
-    async inSchema(elementName: ElementName): Promise<SchemaDefinitionName> {
+    inSchema = moize(async (elementName: ElementName): Promise<SchemaDefinitionName> => {
         const map = await this.elementBySchemaMap()
         return map.get(elementName)
-    }
+    })
 
-    async elementBySchemaMap(): Promise<Map<ElementName, SchemaDefinitionName>> {
-        if (this._elementBySchemaMap) {
-            return this._elementBySchemaMap
-        }
+    elementBySchemaMap = moize(async (): Promise<Map<ElementName, SchemaDefinitionName>> => {
         const map = new Map()
         const schemas = await this.allSchema(true)
         for (const schema of schemas) {
@@ -436,15 +431,13 @@ export class SchemaView {
                 }
             }
         }
-        this._elementBySchemaMap = map
         return map
-    }
+    })
 
-    // TODO: this should be memoized
-    async allSchema(imports: boolean = true): Promise<SchemaDefinition[]> {
+    allSchema = moize(async (imports: boolean = true): Promise<SchemaDefinition[]> => {
         const schemaNames = await this.importsClosure(imports)
         return schemaNames.map(name => this.schemaMap.get(name))
-    }
+    })
 
     async mergeImports() {
         const toMerge = (await this.allSchema(true)).filter(s => s !== this.schema)
