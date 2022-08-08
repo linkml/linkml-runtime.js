@@ -109,3 +109,8 @@ describe('SchemaView Imports', () => {
         expect(await view.inSchema('string')).toEqual('types')
     })
 })
+
+test('SchemaView.mergeImports', async () => {
+    const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
+    await view.mergeImports()
+})

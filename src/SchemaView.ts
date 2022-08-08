@@ -92,6 +92,7 @@ export class SchemaView {
     schemaMap: Map<SchemaDefinitionName, SchemaDefinition>
     _namespaces: Namespaces
     _elementBySchemaMap: Map<ElementName, SchemaDefinitionName>
+    modifications: number
 
     static async load(file: string) {
         const schema = await loadSchema(file)
@@ -101,6 +102,7 @@ export class SchemaView {
     constructor(schema: SchemaDefinition) {
         this.schema = schema
         this.schemaMap = new Map([[this.schema.name, this.schema]])
+        this.modifications = 0
         this._index()
     }
 
@@ -442,6 +444,53 @@ export class SchemaView {
     async allSchema(imports: boolean = true): Promise<SchemaDefinition[]> {
         const schemaNames = await this.importsClosure(imports)
         return schemaNames.map(name => this.schemaMap.get(name))
+    }
+
+    async mergeImports() {
+        const toMerge = (await this.allSchema(true)).filter(s => s !== this.schema)
+        for (const other of toMerge) {
+            this.mergeSchema(other)
+        }
+        this.schema.imports = null
+        this.setModified()
+    }
+
+    mergeSchema(schema: SchemaDefinition): void {
+        if (schema.prefixes) {
+            this.schema.prefixes = {
+                ...schema.prefixes,
+                ...this.schema.prefixes
+            }
+        }
+        if (schema.classes) {
+            this.schema.classes = {
+                ...schema.classes,
+                ...this.schema.classes
+            }
+        }
+        if (schema.slots) {
+            this.schema.slots = {
+                ...schema.slots,
+                ...this.schema.slots
+            }
+        }
+        if (schema.types) {
+            this.schema.types = {
+                ...schema.types,
+                ...this.schema.types
+            }
+        }
+        if (schema.enums) {
+            this.schema.enums = {
+                ...schema.enums,
+                ...this.schema.enums
+            }
+        }
+        this.setModified()
+    }
+
+    setModified(): void {
+        this.modifications += 1
     }
 
     // DEPRECATED
