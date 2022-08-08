@@ -112,5 +112,16 @@ describe('SchemaView Imports', () => {
 
 test('SchemaView.mergeImports', async () => {
     const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
+
+    const allClasses = await view.allClasses()
+    const allClassesNoImport = await view.allClasses('preserve', false)
+    expect(allClassesNoImport.size).toBeLessThan(allClasses.size)
+
     await view.mergeImports()
+    
+    const allClasses2 = await view.allClasses()
+    expect(allClasses.size).toEqual(allClasses2.size)
+
+    const allClassesNoImport2 = await view.allClasses('preserve', false)
+    expect(allClassesNoImport2.size).toEqual(allClasses2.size)
 })

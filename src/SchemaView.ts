@@ -12,10 +12,42 @@ import moize from 'moize'
 
 export type Name = ClassDefinitionName | SlotDefinitionName
 
+export type OrderedBy = "rank" | "lexical" | "preserve"
+
 function isDefinition(x: Element | Name ): x is Element {
     return x!= undefined && (<Element>x).name !== undefined;
 }
 
+function orderLexically(elements: Map<ElementName, Element>): Map<ElementName, Element> {
+    const orderedElements: Map<ElementName, Element> = new Map()
+    const orderedElementNames = [...elements.keys()].sort()
+    for (const name of orderedElementNames) {
+        orderedElements.set(name, elements.get(name))
+    }
+    return orderedElements
+}
+
+function orderRank(elements: Map<ElementName, Element>): Map<ElementName, Element> {
+    const rankedElements: Map<Number, Element> = new Map()
+    const unrankedElements: Map<ElementName, Element> = new Map()
+    for (const [name, element] of elements) {
+        if (element.rank !== undefined) {
+            rankedElements.set(element.rank, element)
+        } else {
+            unrankedElements.set(name, element)
+        }
+    }
+    const orderedRanks = [...rankedElements.keys()].sort()
+    const orderedElements: Map<ElementName, Element> = new Map()
+    for (const rank of orderedRanks) {
+        const element = rankedElements.get(rank)
+        orderedElements.set(element.name, element)
+    }
+    for (const [name, element] of unrankedElements) {
+        orderedElements.set(name, element)
+    }
+    return orderedElements
+}
 
 function _closure(f, x, reflexive=true) {
     let rv = []
@@ -437,6 +469,28 @@ export class SchemaView {
     allSchema = moize(async (imports: boolean = true): Promise<SchemaDefinition[]> => {
         const schemaNames = await this.importsClosure(imports)
         return schemaNames.map(name => this.schemaMap.get(name))
+    })
+
+    allClasses = moize(async (orderedBy: OrderedBy = "preserve", imports: boolean = true): Promise<Map<ClassDefinitionName, ClassDefinition>> => {
+        const schemas = await this.allSchema(imports)
+        const classes: Map<ClassDefinitionName, ClassDefinition> = new Map()
+        for (const schema of schemas) {
+            if (schema.classes) {
+                for (const [name, cls] of Object.entries(schema.classes)) {
+                    classes.set(name, cls)
+                }
+            }
+        }
+        
+        let orderedClasses
+        if (orderedBy === 'lexical') {
+            orderedClasses = orderLexically(classes)
+        } else if (orderedBy === 'rank') {
+            orderedClasses = orderRank(classes)
+        } else {
+            orderedClasses = classes
+        }
+        return orderedClasses
     })
 
     async mergeImports() {
