@@ -98,36 +98,36 @@ describe('schemaview', function() {
 
 describe('SchemaView Imports', () => {
     it('should return correct imports closure', async () => {
-        const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
-        const closure = await view.importsClosure()
-        expect(closure).toEqual(['kitchen_sink', 'core', 'linkml:types'])
+        const view = await SchemaView.load(SCHEMA_WITH_IMPORTS, true)
 
-        expect(await view.inSchema('Person')).toEqual('kitchen_sink')
-        expect(await view.inSchema('id')).toEqual('core')
-        expect(await view.inSchema('name')).toEqual('core')
-        expect(await view.inSchema('activity')).toEqual('core')
-        expect(await view.inSchema('string')).toEqual('types')
+        expect(view.importsClosure()).toEqual(['kitchen_sink', 'core', 'linkml:types'])
 
-        expect((await view.allClasses()).keys()).toContain('activity')
-        expect((await view.allClasses('preserve', false))).not.toContain('activity')
+        expect(view.inSchema('Person')).toEqual('kitchen_sink')
+        expect(view.inSchema('id')).toEqual('core')
+        expect(view.inSchema('name')).toEqual('core')
+        expect(view.inSchema('activity')).toEqual('core')
+        expect(view.inSchema('string')).toEqual('types')
 
-        expect((await view.allTypes()).keys()).toContain('string')
-        expect((await view.allTypes(false)).keys()).not.toContain('string')
+        expect(view.allClasses().keys()).toContain('activity')
+        expect(view.allClasses('preserve', false).keys()).not.toContain('activity')
+
+        expect(view.allTypes().keys()).toContain('string')
+        expect(view.allTypes(false).keys()).not.toContain('string')
     })
 })
 
 test('SchemaView.mergeImports', async () => {
-    const view = await SchemaView.load(SCHEMA_WITH_IMPORTS)
+    const view = await SchemaView.load(SCHEMA_WITH_IMPORTS, true)
 
-    const allClasses = await view.allClasses()
-    const allClassesNoImport = await view.allClasses('preserve', false)
+    const allClasses = view.allClasses()
+    const allClassesNoImport = view.allClasses('preserve', false)
     expect(allClassesNoImport.size).toBeLessThan(allClasses.size)
 
     await view.mergeImports()
     
-    const allClasses2 = await view.allClasses()
+    const allClasses2 = view.allClasses()
     expect(allClasses.size).toEqual(allClasses2.size)
 
-    const allClassesNoImport2 = await view.allClasses('preserve', false)
+    const allClassesNoImport2 = view.allClasses('preserve', false)
     expect(allClassesNoImport2.size).toEqual(allClasses2.size)
 })

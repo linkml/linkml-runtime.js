@@ -8,7 +8,6 @@ import {
 import Namespaces from './Namespaces';
 import path from 'path'
 import fetch from 'cross-fetch'
-import moize from 'moize'
 
 export type Name = ClassDefinitionName | SlotDefinitionName
 
@@ -124,17 +123,23 @@ export class SchemaView {
     virtual_schema: SchemaDefinition
     schemaMap: Map<SchemaDefinitionName, SchemaDefinition>
     _namespaces: Namespaces
+    _importsLoaded: boolean
     modifications: number
 
-    static async load(file: string) {
+    static async load(file: string, loadImportsClosure: boolean = false) {
         const schema = await loadSchema(file)
-        return new SchemaView(schema)
+        const view = new SchemaView(schema)
+        if (loadImportsClosure) {
+            await view.loadImportsClosure()
+        }
+        return view
     }
 
     constructor(schema: SchemaDefinition) {
         this.schema = schema
         this.schemaMap = new Map([[this.schema.name, this.schema]])
         this.modifications = 0
+        this._importsLoaded = false
         this._index()
     }
 
@@ -405,16 +410,15 @@ export class SchemaView {
         return loadSchema(fileName, baseDir)
     }
 
-    importsClosure = moize(async (traverse = true, injectMetadata = true): Promise<SchemaDefinitionName[]> => {
+    async loadImportsClosure(): Promise<void> {
+        if (this._importsLoaded) {
+            return
+        }
         if (!this.schemaMap) {
             this.schemaMap = new Map([[this.schema.name, this.schema]])
         }
-        const closure = []
         const visited = new Set()
         const todo = [this.schema.name]
-        if (!traverse) {
-            return todo
-        }
         while (todo.length > 0) {
             const schemaName = todo.pop()
             visited.add(schemaName)
@@ -423,9 +427,6 @@ export class SchemaView {
                 this.schemaMap.set(schemaName, importedSchema)
             }
             const schema = this.schemaMap.get(schemaName)
-            if (!closure.includes(schemaName)) {
-                closure.push(schemaName)
-            }
             if (schema.imports) {
                 for (const i of schema.imports) {
                     if (!visited.has(i)) {
@@ -434,17 +435,27 @@ export class SchemaView {
                 }
             }
         }
-        return closure
-    })
+        this._importsLoaded = true
+    }
 
-    inSchema = moize(async (elementName: ElementName): Promise<SchemaDefinitionName> => {
-        const map = await this.elementBySchemaMap()
+    importsClosure(traverse: boolean = true): SchemaDefinitionName[] {
+        if (!traverse) {
+            return [this.schema.name]
+        }
+        if (!this._importsLoaded) {
+            console.warn('importsClosure called with traverse = true, but loadImportsClosure has not been called')
+        }
+        return [...this.schemaMap.keys()]
+    }
+
+    inSchema(elementName: ElementName): SchemaDefinitionName {
+        const map = this.elementBySchemaMap()
         return map.get(elementName)
-    })
+    }
 
-    elementBySchemaMap = moize(async (): Promise<Map<ElementName, SchemaDefinitionName>> => {
+    elementBySchemaMap(imports: boolean = true): Map<ElementName, SchemaDefinitionName> {
         const map = new Map()
-        const schemas = await this.allSchema(true)
+        const schemas = this.allSchema(imports)
         for (const schema of schemas) {
             for (const typeKey of [CLASSES, SLOTS, TYPES, ENUMS, SUBSETS]) {
                 if (schema[typeKey]) {
@@ -464,10 +475,10 @@ export class SchemaView {
             }
         }
         return map
-    })
+    }
 
-    async _getElements(slotName: string, imports: boolean = true): Promise<Map<ElementName, Element>> {
-        const schemas = await this.allSchema(imports)
+    _getElements(slotName: string, imports: boolean = true): Map<ElementName, Element> {
+        const schemas = this.allSchema(imports)
         const elements: Map<ElementName, Element> = new Map()
         for (const schema of schemas) {
             if (schema[slotName]) {
@@ -479,13 +490,13 @@ export class SchemaView {
         return elements
     }
 
-    allSchema = moize(async (imports: boolean = true): Promise<SchemaDefinition[]> => {
-        const schemaNames = await this.importsClosure(imports)
+    allSchema(imports: boolean = true): SchemaDefinition[] {
+        const schemaNames = this.importsClosure(imports)
         return schemaNames.map(name => this.schemaMap.get(name))
-    })
+    }
 
-    allClasses = moize(async (orderedBy: OrderedBy = "preserve", imports: boolean = true): Promise<Map<ClassDefinitionName, ClassDefinition>> => {
-        const classes = await this._getElements(CLASSES, imports)
+    allClasses(orderedBy: OrderedBy = "preserve", imports: boolean = true): Map<ClassDefinitionName, ClassDefinition> {
+        const classes = this._getElements(CLASSES, imports)
         
         let orderedClasses
         if (orderedBy === 'lexical') {
@@ -496,14 +507,15 @@ export class SchemaView {
             orderedClasses = classes
         }
         return orderedClasses
-    })
+    }
 
-    allTypes = moize(async (imports: boolean = true): Promise<Map<TypeDefinitionName, TypeDefinition>> => {
+    allTypes(imports: boolean = true): Map<TypeDefinitionName, TypeDefinition> {
         return this._getElements(TYPES, imports)
-    })
+    }
 
     async mergeImports() {
-        const toMerge = (await this.allSchema(true)).filter(s => s !== this.schema)
+        await this.loadImportsClosure()
+        const toMerge = this.allSchema(true).filter(s => s !== this.schema)
         for (const other of toMerge) {
             this.mergeSchema(other)
         }
