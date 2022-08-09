@@ -107,6 +107,12 @@ describe('SchemaView Imports', () => {
         expect(await view.inSchema('name')).toEqual('core')
         expect(await view.inSchema('activity')).toEqual('core')
         expect(await view.inSchema('string')).toEqual('types')
+
+        expect((await view.allClasses()).keys()).toContain('activity')
+        expect((await view.allClasses('preserve', false))).not.toContain('activity')
+
+        expect((await view.allTypes()).keys()).toContain('string')
+        expect((await view.allTypes(false)).keys()).not.toContain('string')
     })
 })
 

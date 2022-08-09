@@ -466,21 +466,26 @@ export class SchemaView {
         return map
     })
 
+    async _getElements(slotName: string, imports: boolean = true): Promise<Map<ElementName, Element>> {
+        const schemas = await this.allSchema(imports)
+        const elements: Map<ElementName, Element> = new Map()
+        for (const schema of schemas) {
+            if (schema[slotName]) {
+                for (const [name, cls] of Object.entries(schema[slotName])) {
+                    elements.set(name, cls)
+                }
+            }
+        }
+        return elements
+    }
+
     allSchema = moize(async (imports: boolean = true): Promise<SchemaDefinition[]> => {
         const schemaNames = await this.importsClosure(imports)
         return schemaNames.map(name => this.schemaMap.get(name))
     })
 
     allClasses = moize(async (orderedBy: OrderedBy = "preserve", imports: boolean = true): Promise<Map<ClassDefinitionName, ClassDefinition>> => {
-        const schemas = await this.allSchema(imports)
-        const classes: Map<ClassDefinitionName, ClassDefinition> = new Map()
-        for (const schema of schemas) {
-            if (schema.classes) {
-                for (const [name, cls] of Object.entries(schema.classes)) {
-                    classes.set(name, cls)
-                }
-            }
-        }
+        const classes = await this._getElements(CLASSES, imports)
         
         let orderedClasses
         if (orderedBy === 'lexical') {
@@ -491,6 +496,10 @@ export class SchemaView {
             orderedClasses = classes
         }
         return orderedClasses
+    })
+
+    allTypes = moize(async (imports: boolean = true): Promise<Map<TypeDefinitionName, TypeDefinition>> => {
+        return this._getElements(TYPES, imports)
     })
 
     async mergeImports() {

@@ -151,8 +151,6 @@ export default class Namespaces {
       prefix = this.#base_key
       local = uri_or_curie
     }
-
-    console.log(this.#store)
     if (!this.#store.has(prefix)) {
       throw new Error('Unknown CURIE prefix: ' + prefix)
     }
