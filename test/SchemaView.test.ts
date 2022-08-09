@@ -113,6 +113,8 @@ describe('SchemaView Imports', () => {
 
         expect(view.allTypes().keys()).toContain('string')
         expect(view.allTypes(false).keys()).not.toContain('string')
+
+        expect(view.typeAncestors('SymbolString').sort()).toEqual(['SymbolString', 'string'])
     })
 })
 

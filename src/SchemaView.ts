@@ -48,7 +48,7 @@ function orderRank(elements: Map<ElementName, Element>): Map<ElementName, Elemen
     return orderedElements
 }
 
-function _closure(f, x, reflexive=true) {
+function _closure<T>(f: (x: T) => T[], x: T, reflexive=true): T[] {
     let rv = []
     if (reflexive) {
         rv = [x]
@@ -181,13 +181,11 @@ export class SchemaView {
      *
      * @param name - Type or Type name
      */
-    get_type(name: TypeDefinitionName | TypeDefinition): TypeDefinition {
+    get_type(name: TypeDefinitionName | TypeDefinition, imports: boolean = true): TypeDefinition {
         if (isDefinition(name)) {
             return name
         }
-        else {
-            return this.virtual_schema.types[name]
-        }
+        return this.allTypes(imports).get(name)
     }
 
     /**
@@ -300,6 +298,19 @@ export class SchemaView {
             return t.slot_parents(x, opts)
         }
         return _closure(f, elt)
+    }
+
+    typeParents(typeName: TypeDefinitionName | TypeDefinition, imports: boolean = true): TypeDefinitionName[] {
+        const typ = this.get_type(typeName, imports)
+        if (typ.typeof) {
+            return [typ.typeof]
+        } else {
+            return []
+        }
+    }
+
+    typeAncestors(typeName: TypeDefinitionName, opts: TraversalOptions = {}): TypeDefinitionName[] {
+        return _closure((t) => this.typeParents(t, opts.imports), typeName)
     }
 
     merge_slot(base_slot: SlotDefinition, to_merge: SlotDefinition, isReflexive = false): SlotDefinition {
