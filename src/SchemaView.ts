@@ -103,8 +103,12 @@ function setNameFromKey(schema: SchemaDefinition, slotName: SlotDefinitionName):
     const elements: {[key: ElementName]: Element} = schema[slotName]
     if (elements) {
         for (const [key, element] of Object.entries(elements)) {
-            if (element && !element.name) {
-                element.name = key
+            if (element) {
+                if (!element.name) {
+                    element.name = key
+                }
+            } else {
+                elements[key] = { name: key }
             }
         }
     }
@@ -586,6 +590,10 @@ export class SchemaView {
 
     allTypes(imports: boolean = true): Map<TypeDefinitionName, TypeDefinition> {
         return this._getElements(TYPES, imports)
+    }
+
+    allEnums(imports: boolean = true): Map<EnumDefinitionName, EnumDefinition> {
+        return this._getElements(ENUMS, imports)
     }
 
     async mergeImports() {
