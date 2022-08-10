@@ -8,6 +8,7 @@ import {
 import Namespaces from './Namespaces';
 import path from 'path'
 import fetch from 'cross-fetch'
+import { klona } from 'klona'
 
 export type Name = ClassDefinitionName | SlotDefinitionName
 
@@ -90,7 +91,23 @@ async function loadSchema(file: string, baseDir: string | null = null): Promise<
     }
     const schema: SchemaDefinition = parse(content)
     schema.source_file = file
+    setNameFromKey(schema, SUBSETS)
+    setNameFromKey(schema, TYPES)
+    setNameFromKey(schema, ENUMS)
+    setNameFromKey(schema, SLOTS)
+    setNameFromKey(schema, CLASSES)
     return schema
+}
+
+function setNameFromKey(schema: SchemaDefinition, slotName: SlotDefinitionName): void {
+    const elements: {[key: ElementName]: Element} = schema[slotName]
+    if (elements) {
+        for (const [key, element] of Object.entries(elements)) {
+            if (element && !element.name) {
+                element.name = key
+            }
+        }
+    }
 }
 
 interface TraversalSpecificOptions {
@@ -140,6 +157,13 @@ export class SchemaView {
         this.schemaMap = new Map([[this.schema.name, this.schema]])
         this.modifications = 0
         this._importsLoaded = false
+
+        setNameFromKey(this.schema, SUBSETS)
+        setNameFromKey(this.schema, TYPES)
+        setNameFromKey(this.schema, ENUMS)
+        setNameFromKey(this.schema, SLOTS)
+        setNameFromKey(this.schema, CLASSES)
+
         this._index()
     }
 
@@ -368,6 +392,23 @@ export class SchemaView {
         return islot
     }
 
+    inducedType(typeName: TypeDefinitionName): TypeDefinition {
+        const typ = klona(this.get_type(typeName))
+        if (typ.typeof) {
+            const parent = this.inducedType(typ.typeof)
+            if (!typ.uri) {
+                typ.uri = parent.uri
+            }
+            if (!typ.base) {
+                typ.base = parent.base
+            }
+            if (!typ.repr) {
+                typ.repr = parent.repr
+            }
+        }
+        return typ
+    }
+
     /**
      * Get the range object for a slot
      *
@@ -442,6 +483,29 @@ export class SchemaView {
                 for (const i of schema.imports) {
                     if (!visited.has(i)) {
                         todo.push(i)
+                    }
+                }
+            }
+        }
+        for (const schema of this.schemaMap.values()) {
+            for (const key of [CLASSES, ENUMS, SLOTS, SUBSETS, TYPES]) {
+                if (schema[key]) {
+                    let element: Element
+                    for (element of Object.values(schema[key])) {
+                        if (element) {
+                            element.from_schema = schema.id
+                        }
+                    }
+                }
+            }
+            if (schema.classes) {
+                for (const cls of Object.values(schema.classes)) {
+                    if (cls && cls.attributes) {
+                        for (const attr of Object.values(cls.attributes)) {
+                            if (attr) {
+                                attr.from_schema = schema.id
+                            }
+                        }
                     }
                 }
             }

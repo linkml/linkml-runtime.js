@@ -111,10 +111,23 @@ describe('SchemaView Imports', () => {
         expect(view.allClasses().keys()).toContain('activity')
         expect(view.allClasses('preserve', false).keys()).not.toContain('activity')
 
+        const allTypesNoImports = view.allTypes(false)
         expect(view.allTypes().keys()).toContain('string')
-        expect(view.allTypes(false).keys()).not.toContain('string')
+        expect(allTypesNoImports.keys()).not.toContain('string')
 
         expect(view.typeAncestors('SymbolString').sort()).toEqual(['SymbolString', 'string'])
+
+        for (const [typeName, type] of view.allTypes()) {
+            expect(type.name).toEqual(typeName)
+            const inducedType = view.inducedType(typeName)
+            expect(inducedType.uri).not.toBeUndefined()
+            expect(inducedType.base).not.toBeUndefined()
+            if (typeName in allTypesNoImports.keys()) {
+                expect(type.from_schema).toEqual('https://w3id.org/linkml/tests/kitchen_sink')
+            } else {
+                expect(['https://w3id.org/linkml/tests/core', 'https://w3id.org/linkml/types']).toContain(type.from_schema)
+            }
+        }
     })
 })
 
