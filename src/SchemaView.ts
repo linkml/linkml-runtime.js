@@ -96,10 +96,16 @@ async function loadSchema(file: string, baseDir: string | null = null): Promise<
     setNameFromKey(schema, ENUMS)
     setNameFromKey(schema, SLOTS)
     setNameFromKey(schema, CLASSES)
+    if (schema.classes) {
+        Object.values(schema.classes).forEach(cls => setNameFromKey(cls, 'attributes'))
+    }
     return schema
 }
 
-function setNameFromKey(schema: SchemaDefinition, slotName: SlotDefinitionName): void {
+function setNameFromKey(schema: SchemaDefinition | ClassDefinition, slotName: SlotDefinitionName): void {
+    if (!schema) {
+        return
+    }
     const elements: {[key: ElementName]: Element} = schema[slotName]
     if (elements) {
         for (const [key, element] of Object.entries(elements)) {
@@ -167,6 +173,9 @@ export class SchemaView {
         setNameFromKey(this.schema, ENUMS)
         setNameFromKey(this.schema, SLOTS)
         setNameFromKey(this.schema, CLASSES)
+        if (this.schema.classes) {
+            Object.values(this.schema.classes).forEach(cls => setNameFromKey(cls, 'attributes'))
+        }
 
         this._index()
     }
@@ -594,6 +603,31 @@ export class SchemaView {
 
     allEnums(imports: boolean = true): Map<EnumDefinitionName, EnumDefinition> {
         return this._getElements(ENUMS, imports)
+    }
+
+    allSlots(imports: boolean = true, attributes: boolean = true, orderedBy: OrderedBy = 'preserve'): Map<SlotDefinitionName, SlotDefinition> {
+        const slots = klona(this._getElements(SLOTS, imports))
+        if (attributes) {
+            for (const cls of this.allClasses().values()) {
+                if (cls && cls.attributes) {
+                    for (const [attrName, attr] of Object.entries(cls.attributes)) {
+                        if (!slots.has(attrName)) {
+                            slots.set(attrName, attr)
+                        }
+                    }
+                }
+            }
+        }
+
+        let orderedSlots: Map<SlotDefinitionName, SlotDefinition>
+        if (orderedBy === 'lexical') {
+            orderedSlots = orderLexically(slots)
+        } else if (orderedBy === 'rank') {
+            orderedSlots = orderRank(slots)
+        } else {
+            orderedSlots = slots
+        }
+        return orderedSlots
     }
 
     async mergeImports() {

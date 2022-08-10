@@ -140,6 +140,17 @@ describe('SchemaView Imports', () => {
                 expect(enumDefn.from_schema).toEqual('https://w3id.org/linkml/tests/core')
             }
         }
+
+        const allSlots = view.allSlots()
+        const allSlotsNoImports = view.allSlots(false)
+        for (const [slotName, slot] of allSlots) {
+            expect(slot.name).toEqual(slotName)
+            if (allSlotsNoImports.has(slotName)) {
+                expect(slot.from_schema).toEqual('https://w3id.org/linkml/tests/kitchen_sink')
+            } else {
+                expect(slot.from_schema).toEqual('https://w3id.org/linkml/tests/core')
+            }
+        }
     })
 })
 
