@@ -108,8 +108,10 @@ describe('SchemaView Imports', () => {
         expect(view.inSchema('activity')).toEqual('core')
         expect(view.inSchema('string')).toEqual('types')
 
-        expect(view.allClasses().keys()).toContain('activity')
-        expect(view.allClasses('preserve', false).keys()).not.toContain('activity')
+        const allClasses = view.allClasses()
+        const allClassesNoImport = view.allClasses('preserve', false)
+        expect(allClasses.keys()).toContain('activity')
+        expect(allClassesNoImport.keys()).not.toContain('activity')
 
         const allTypes = view.allTypes()
         const allTypesNoImports = view.allTypes(false)
@@ -150,6 +152,34 @@ describe('SchemaView Imports', () => {
             } else {
                 expect(slot.from_schema).toEqual('https://w3id.org/linkml/tests/core')
             }
+        }
+
+        for (const [className, cls] of allClasses) {
+            expect(cls.name).toEqual(className)
+            if (allClassesNoImport.has(className)) {
+                expect(cls.from_schema).toEqual('https://w3id.org/linkml/tests/kitchen_sink')
+            } else {
+                expect(cls.from_schema).toEqual('https://w3id.org/linkml/tests/core')
+            }
+            for (const slot of view.classInducedSlots(className)) {
+                if (Array.from(allClassesNoImport.values()).includes(slot)) {
+                    expect(slot.slot_uri).toBeUndefined()
+                    expect(slot.from_schema).toEqual('https://w3id.org/linkml/tests/kitchen_sink')
+                }
+            }
+        }
+
+        for (const className of ['Company', 'Person', 'Organization', 'Thing']) {
+            expect(view.induced_slot('id', className).identifier).toEqual(true)
+            expect(view.induced_slot('name', className).identifier).not.toEqual(true)
+            expect(view.induced_slot('name', className).required).toEqual(false)
+            // TODO: This should be coming from the schema default_range
+            // expect(view.induced_slot('name', className).range).toEqual('string')
+        }
+        for (const className of ['Event', 'EmploymentEvent', 'MedicalEvent']) {
+            const slot = view.induced_slot('started at time', className)
+            expect(slot.range).toEqual('date')
+            expect(slot.slot_uri).toEqual('prov:startedAtTime')
         }
     })
 })

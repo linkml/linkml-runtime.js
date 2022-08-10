@@ -190,13 +190,11 @@ export class SchemaView {
      *
      * @param name - class or class name
      */
-    get_class(name: ClassDefinitionName | ClassDefinition): ClassDefinition {
+    get_class(name: ClassDefinitionName | ClassDefinition, imports: boolean = true): ClassDefinition {
         if (isDefinition(name)) {
             return name
         }
-        else {
-            return this.virtual_schema.classes[name]
-        }
+        return this.allClasses('preserve', imports).get(name)
     }
 
     /**
@@ -235,11 +233,12 @@ export class SchemaView {
             return name
         }
         else {
-            if (this.virtual_schema.slots != undefined && name in this.virtual_schema.slots) {
-                return this.virtual_schema.slots[name]
+            const slot = this.allSlots().get(name)
+            if (slot) {
+                return slot
             }
             else {
-                for (const [cn, c] of Object.entries(this.virtual_schema.classes)) {
+                for (const [cn, c] of this.allClasses()) {
                     if (c.attributes != undefined) {
                         for (const [k, attr] of Object.entries(c.attributes)) {
                             if (k == name) {
@@ -420,6 +419,34 @@ export class SchemaView {
             }
         }
         return typ
+    }
+
+    classSlots(className: ClassDefinitionName, imports: boolean = true, direct: boolean = false, attributes: boolean = true): SlotDefinitionName[] {
+        let ancestors: ClassDefinitionName[]
+        if (direct) {
+            ancestors = [className]
+        } else {
+            ancestors = this.class_ancestors(className, { imports })
+        }
+        const slots = new Set<SlotDefinitionName>()
+        for (const ancestorName of ancestors) {
+            const ancestor = this.get_class(ancestorName)
+            if (ancestor.slots) {
+                for (const ancestorSlot of ancestor.slots) {
+                    slots.add(ancestorSlot)
+                }
+            }
+            if (attributes && ancestor.attributes) {
+                for (const attributeName of Object.keys(ancestor.attributes)) {
+                    slots.add(attributeName)
+                }
+            }
+        }
+        return Array.from(slots)
+    }
+
+    classInducedSlots(className: ClassDefinitionName, imports: boolean = true): SlotDefinition[] {
+        return this.classSlots(className).map(slotName => this.induced_slot(slotName, className, { imports }))
     }
 
     /**
