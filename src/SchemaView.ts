@@ -49,7 +49,7 @@ function orderRank(elements: Map<ElementName, Element>): Map<ElementName, Elemen
     return orderedElements
 }
 
-function _closure<T>(f: (x: T) => T[], x: T, reflexive=true): T[] {
+function closure<T>(f: (x: T) => T[], x: T, reflexive=true): T[] {
     let rv = []
     if (reflexive) {
         rv = [x]
@@ -70,7 +70,7 @@ function _closure<T>(f: (x: T) => T[], x: T, reflexive=true): T[] {
     return rv
 }
 
-function _not_false(v) {
+function notFalse(v) {
     return v == undefined || v == true
 }
 
@@ -190,7 +190,7 @@ export class SchemaView {
      *
      * @param name - class or class name
      */
-    get_class(name: ClassDefinitionName | ClassDefinition, imports: boolean = true): ClassDefinition {
+    getClass(name: ClassDefinitionName | ClassDefinition, imports: boolean = true): ClassDefinition {
         if (isDefinition(name)) {
             return name
         }
@@ -202,7 +202,7 @@ export class SchemaView {
      *
      * @param name - enum or enum name
      */
-    get_enum(name: EnumDefinitionName | EnumDefinition): EnumDefinition {
+    getEnum(name: EnumDefinitionName | EnumDefinition): EnumDefinition {
         if (isDefinition(name)) {
             return name
         }
@@ -216,7 +216,7 @@ export class SchemaView {
      *
      * @param name - Type or Type name
      */
-    get_type(name: TypeDefinitionName | TypeDefinition, imports: boolean = true): TypeDefinition {
+    getType(name: TypeDefinitionName | TypeDefinition, imports: boolean = true): TypeDefinition {
         if (isDefinition(name)) {
             return name
         }
@@ -228,7 +228,7 @@ export class SchemaView {
      *
      * @param name - class or class name
      */
-    get_slot(name: SlotDefinitionName | SlotDefinition): SlotDefinition {
+    getSlot(name: SlotDefinitionName | SlotDefinition): SlotDefinition {
         if (isDefinition(name)) {
             return name
         }
@@ -260,10 +260,10 @@ export class SchemaView {
      */
     parents(elt: ClassDefinition | SlotDefinition, opts: TraversalOptions): Name[] {
         let parents = []
-        if (_not_false(opts.is_a) && elt && elt.is_a != undefined) {
+        if (notFalse(opts.is_a) && elt && elt.is_a != undefined) {
             parents = [elt.is_a]
         }
-        if (_not_false(opts.mixins) && elt && elt.mixins != undefined) {
+        if (notFalse(opts.mixins) && elt && elt.mixins != undefined) {
             parents = parents.concat(elt.mixins)
         }
         return parents
@@ -280,7 +280,7 @@ export class SchemaView {
         let f = function (x) {
             return t.parents(x, opts)
         }
-        return _closure(f, elt)
+        return closure(f, elt)
     }
 
     /**
@@ -289,8 +289,8 @@ export class SchemaView {
      * @param elt
      * @param opts
      */
-    class_parents(elt: ClassDefinitionName | ClassDefinition, opts: TraversalOptions): ClassDefinitionName[] {
-        let c = this.get_class(elt)
+    classParents(elt: ClassDefinitionName | ClassDefinition, opts: TraversalOptions): ClassDefinitionName[] {
+        let c = this.getClass(elt)
         return this.parents(c, opts)
     }
 
@@ -300,8 +300,8 @@ export class SchemaView {
      * @param elt
      * @param opts
      */
-    slot_parents(elt: SlotDefinitionName | SlotDefinition, opts: TraversalOptions = {}): SlotDefinitionName[] {
-        let s = this.get_slot(elt)
+    slotParents(elt: SlotDefinitionName | SlotDefinition, opts: TraversalOptions = {}): SlotDefinitionName[] {
+        let s = this.getSlot(elt)
         if (s == undefined) {
             throw 'No such slot: ' + elt
         }
@@ -314,12 +314,12 @@ export class SchemaView {
      * @param elt
      * @param opts
      */
-    class_ancestors(elt: ClassDefinitionName | ClassDefinition, opts: TraversalOptions = {}): ClassDefinitionName[] {
+    classAncestors(elt: ClassDefinitionName | ClassDefinition, opts: TraversalOptions = {}): ClassDefinitionName[] {
         let t = this
         let f = function (x) {
-            return t.class_parents(x, opts)
+            return t.classParents(x, opts)
         }
-        return _closure(f, elt)
+        return closure(f, elt)
     }
 
     /**
@@ -328,16 +328,16 @@ export class SchemaView {
      * @param elt
      * @param opts
      */
-    slot_ancestors(elt: SlotDefinitionName | SlotDefinition, opts: TraversalOptions = {}): SlotDefinitionName[] {
+    slotAncestors(elt: SlotDefinitionName | SlotDefinition, opts: TraversalOptions = {}): SlotDefinitionName[] {
         let t = this
         let f = function (x) {
-            return t.slot_parents(x, opts)
+            return t.slotParents(x, opts)
         }
-        return _closure(f, elt)
+        return closure(f, elt)
     }
 
     typeParents(typeName: TypeDefinitionName | TypeDefinition, imports: boolean = true): TypeDefinitionName[] {
-        const typ = this.get_type(typeName, imports)
+        const typ = this.getType(typeName, imports)
         if (typ.typeof) {
             return [typ.typeof]
         } else {
@@ -346,10 +346,10 @@ export class SchemaView {
     }
 
     typeAncestors(typeName: TypeDefinitionName, opts: TraversalOptions = {}): TypeDefinitionName[] {
-        return _closure((t) => this.typeParents(t, opts.imports), typeName)
+        return closure((t) => this.typeParents(t, opts.imports), typeName)
     }
 
-    merge_slot(base_slot: SlotDefinition, to_merge: SlotDefinition, isReflexive = false): SlotDefinition {
+    mergeSlot(base_slot: SlotDefinition, to_merge: SlotDefinition, isReflexive = false): SlotDefinition {
         if (to_merge == undefined) {
             return base_slot
         }
@@ -369,7 +369,7 @@ export class SchemaView {
      * @param class_name
      * @param opts
      */
-    induced_slot(slot_name: SlotDefinitionName, class_name: ClassDefinitionName | ClassDefinition,
+    inducedSlot(slot_name: SlotDefinitionName, class_name: ClassDefinitionName | ClassDefinition,
                  opts: TraversalOptions = {}): SlotDefinition {
         if (class_name == undefined) {
             //throw 'Undefined class for slot:' + slot_name
@@ -377,35 +377,35 @@ export class SchemaView {
         if (slot_name == undefined) {
             throw 'No such slot ' + slot_name
         }
-        const cls_ancs = this.class_ancestors(class_name)
-        const slot_ancs = this.slot_ancestors(slot_name)
+        const cls_ancs = this.classAncestors(class_name)
+        const slot_ancs = this.slotAncestors(slot_name)
         let islot = {}
-        this.merge_slot(islot, this.get_slot(slot_name))
+        this.mergeSlot(islot, this.getSlot(slot_name))
         for (let cls_anc of cls_ancs) {
             let isReflexive = cls_anc == class_name
-            let cls_anc_obj = this.get_class(cls_anc)
+            let cls_anc_obj = this.getClass(cls_anc)
             if (cls_anc_obj == undefined) {
                 throw 'No such ancestor ' + cls_anc + ' of ' + class_name
             }
             if (cls_anc_obj.attributes != undefined) {
                 if (slot_name in cls_anc_obj.attributes) {
-                    this.merge_slot(islot, cls_anc_obj.attributes[slot_name])
+                    this.mergeSlot(islot, cls_anc_obj.attributes[slot_name])
                 }
             }
             if (cls_anc_obj.slot_usage != undefined) {
                 if (slot_name in cls_anc_obj.slot_usage) {
-                    this.merge_slot(islot, cls_anc_obj.slot_usage[slot_name], isReflexive)
+                    this.mergeSlot(islot, cls_anc_obj.slot_usage[slot_name], isReflexive)
                 }
             }
         }
         for (let slot_anc of slot_ancs) {
-            this.merge_slot(islot, this.get_slot(slot_anc))
+            this.mergeSlot(islot, this.getSlot(slot_anc))
         }
         return islot
     }
 
     inducedType(typeName: TypeDefinitionName): TypeDefinition {
-        const typ = klona(this.get_type(typeName))
+        const typ = klona(this.getType(typeName))
         if (typ.typeof) {
             const parent = this.inducedType(typ.typeof)
             if (!typ.uri) {
@@ -426,11 +426,11 @@ export class SchemaView {
         if (direct) {
             ancestors = [className]
         } else {
-            ancestors = this.class_ancestors(className, { imports })
+            ancestors = this.classAncestors(className, { imports })
         }
         const slots = new Set<SlotDefinitionName>()
         for (const ancestorName of ancestors) {
-            const ancestor = this.get_class(ancestorName)
+            const ancestor = this.getClass(ancestorName)
             if (ancestor.slots) {
                 for (const ancestorSlot of ancestor.slots) {
                     slots.add(ancestorSlot)
@@ -446,7 +446,7 @@ export class SchemaView {
     }
 
     classInducedSlots(className: ClassDefinitionName, imports: boolean = true): SlotDefinition[] {
-        return this.classSlots(className).map(slotName => this.induced_slot(slotName, className, { imports }))
+        return this.classSlots(className).map(slotName => this.inducedSlot(slotName, className, { imports }))
     }
 
     /**
@@ -457,13 +457,13 @@ export class SchemaView {
     slotRange(slot: SlotDefinition): ClassDefinition | EnumDefinition | TypeDefinition {
         let r = slot.range
         if (this.schema.classes && r in this.schema.classes) {
-            return this.get_class(r)
+            return this.getClass(r)
         }
         else if (this.schema.enums && r in this.schema.enums) {
-            return this.get_class(r)
+            return this.getClass(r)
         }
         else if (this.schema.types && r in this.schema.types) {
-            return this.get_type(r)
+            return this.getType(r)
         }
         else {
             //throw 'Unknown range: ' + r + ' for slot: '+slot.name
@@ -734,9 +734,9 @@ export class SchemaView {
             }
             else {
                 for (const [k, v] of Object.entries(obj)) {
-                    const slot = this.induced_slot(k, cls)
+                    const slot = this.inducedSlot(k, cls)
                     const range = slot.range
-                    const range_cls = this.get_class(range) // TODO: enums
+                    const range_cls = this.getClass(range) // TODO: enums
                     // TODO! tsgen should not make string here
                     nuObj[k] = this.walk(v, func, range_cls, slot.multivalued)
                 }
