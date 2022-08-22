@@ -72,7 +72,7 @@ export class Walker {
             else {
                 let newState = state.deepen(obj)
                 for (const [k, v] of Object.entries(obj)) {
-                    const slot = this.schemaView.induced_slot(k, state.instanceOf)
+                    const slot = this.schemaView.inducedSlot(k, state.instanceOf)
                     // TODO
                     //let curr = state.instanceOf
                     //let newState = new WalkerState(state)

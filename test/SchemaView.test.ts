@@ -53,7 +53,7 @@ const SCHEMA_WITH_IMPORTS = path.join(__dirname, 'inputs', 'kitchen_sink.yaml')
 
 describe('walk', function() {
     let sv = new SchemaView(s)
-    let c = sv.get_class("c1")
+    let c = sv.getClass("c1")
 
     it('walk', function () {
         //let opts: TraversalOptions = {mixins: false}
@@ -77,19 +77,19 @@ describe('SchemaView.load', () => {
 
 describe('schemaview', function() {
     let sv = new SchemaView(s)
-    let c = sv.get_class("c1")
+    let c = sv.getClass("c1")
 
     it('ancestors-no-mixins', function() {
         let opts: TraversalOptions = {mixins: false}
-        expect(sv.class_ancestors(c.name, opts)).toEqual(["c1", "c2", "c3"]);
+        expect(sv.classAncestors(c.name, opts)).toEqual(["c1", "c2", "c3"]);
     });
     it('ancestors-with-mixins', function() {
         let opts: TraversalOptions = {mixins: true}
-        expect(sv.class_ancestors(c.name, opts)).toEqual(["c1", "c2", "m1", "c3"]);
+        expect(sv.classAncestors(c.name, opts)).toEqual(["c1", "c2", "m1", "c3"]);
     });
     it('induced-slots', function() {
         let opts: TraversalOptions = {mixins: true}
-        let islot = sv.induced_slot("s1", "c1")
+        let islot = sv.inducedSlot("s1", "c1")
         expect(islot.name).toEqual("s1");
         expect(islot.range).toEqual("s1r_c2");
     });
@@ -170,14 +170,14 @@ describe('SchemaView Imports', () => {
         }
 
         for (const className of ['Company', 'Person', 'Organization', 'Thing']) {
-            expect(view.induced_slot('id', className).identifier).toEqual(true)
-            expect(view.induced_slot('name', className).identifier).not.toEqual(true)
-            expect(view.induced_slot('name', className).required).toEqual(false)
+            expect(view.inducedSlot('id', className).identifier).toEqual(true)
+            expect(view.inducedSlot('name', className).identifier).not.toEqual(true)
+            expect(view.inducedSlot('name', className).required).toEqual(false)
             // TODO: This should be coming from the schema default_range
             // expect(view.induced_slot('name', className).range).toEqual('string')
         }
         for (const className of ['Event', 'EmploymentEvent', 'MedicalEvent']) {
-            const slot = view.induced_slot('started at time', className)
+            const slot = view.inducedSlot('started at time', className)
             expect(slot.range).toEqual('date')
             expect(slot.slot_uri).toEqual('prov:startedAtTime')
         }
