@@ -477,11 +477,17 @@ export class SchemaView {
         this._namespaces = new Namespaces()
         for (const schema of this.schemaMap.values()) {
             for (const [prefix, reference] of Object.entries(schema.prefixes)) {
-                this._namespaces.set(prefix, reference)
+                if (typeof reference === 'string') {
+                    this._namespaces.set(prefix, reference)
+                } else {
+                    this._namespaces.set(reference.prefix_prefix, reference.prefix_reference)
+                }
             }
         }
-        for (const cmap of this.schema.default_curi_maps) {
-            this._namespaces.addPrefixmap(cmap, false)
+        if (this.schema.default_curi_maps) {
+            for (const cmap of this.schema.default_curi_maps) {
+                this._namespaces.addPrefixmap(cmap, false)
+            }
         }
         return this._namespaces
     }
