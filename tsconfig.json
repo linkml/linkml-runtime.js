@@ -4,7 +4,8 @@
         "target": "ES2015",
         "sourceMap": true,
         "outDir": "build",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "skipLibCheck": true
     },
     "exclude": [
         "node_modules"
