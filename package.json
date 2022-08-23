@@ -1,19 +1,31 @@
 {
-  "name": "linkml-js",
+  "name": "linkml-runtime",
   "version": "0.1.0",
   "description": "LinkML EXPERIMENTAL JS/TS implementation",
-  "main": "index.js",
-  "scripts": {
-    "test": "jest"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linkml/linkml-runtime.js.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "homepage": "https://linkml.io/",
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "rimraf build",
+    "test": "jest",
+    "preversion": "yarn build && yarn test",
+    "postversion": "git push --tags && yarn publish . --tag $npm_package_version && git push && echo \"Successfully published version $npm_package_version!\""
+  },
+  "keywords": ["linkml", "schema"],
+  "license": "BSD-3-Clause",
   "devDependencies": {
     "@types/chai": "^4.3.0",
     "@types/jest": "^27.4.0",
     "@types/mocha": "^9.1.0",
     "jest": "^27.5.1",
+    "rimraf": "^3.0.2",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"
