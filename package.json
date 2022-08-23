@@ -1,6 +1,6 @@
 {
   "name": "linkml-runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LinkML EXPERIMENTAL JS/TS implementation",
   "repository": {
     "type": "git",
@@ -18,7 +18,10 @@
     "preversion": "yarn build && yarn test",
     "postversion": "git push --tags && git push && echo \"Successfully pushed new tag. Create a GitHub release to publish new version.\""
   },
-  "keywords": ["linkml", "schema"],
+  "keywords": [
+    "linkml",
+    "schema"
+  ],
   "license": "BSD-3-Clause",
   "devDependencies": {
     "@types/chai": "^4.3.0",
