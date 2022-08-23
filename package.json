@@ -16,7 +16,7 @@
     "clean": "rimraf build",
     "test": "jest",
     "preversion": "yarn build && yarn test",
-    "postversion": "git push --tags && yarn publish . --tag $npm_package_version && git push && echo \"Successfully published version $npm_package_version!\""
+    "postversion": "git push --tags && echo \"Successfully pushed new tag. Create a GitHub release to publish new version.\""
   },
   "keywords": ["linkml", "schema"],
   "license": "BSD-3-Clause",
