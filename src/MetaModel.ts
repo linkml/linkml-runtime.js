@@ -2635,7 +2635,7 @@ linkml.utils.ifabsent_functions.default_library:
     
     
     /**
-     * a rule for inferring a slot assignment based on evaluating a path through a sequence of slot assignemnts
+     * a rule for inferring a slot assignment based on evaluating a path through a sequence of slot assignments
      */
     path_rule?: PathExpression,
     
