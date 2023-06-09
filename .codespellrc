@@ -1,4 +1,6 @@
 [codespell]
 skip = .git,*.pdf,*.svg
+# ignore shortcutted words like [Ff]alse
+ignore-regex = \[[A-Z][a-z]\][a-z][a-z]
 #
 # ignore-words-list =
