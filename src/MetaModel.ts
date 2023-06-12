@@ -2125,7 +2125,7 @@ implicitly asserts Y is an instance of C2
     
     
     /**
-     * the value of the multiavlued slot is a list where all elements conform to the specified values.
+     * the value of the multivalued slot is a list where all elements conform to the specified values.
 this defines a dynamic class with named slots according to matching constraints
 
 E.g to state that all members of a list are between 1 and 10
@@ -2273,7 +2273,7 @@ implicitly asserts Y is an instance of C2
     
     
     /**
-     * the value of the multiavlued slot is a list where all elements conform to the specified values.
+     * the value of the multivalued slot is a list where all elements conform to the specified values.
 this defines a dynamic class with named slots according to matching constraints
 
 E.g to state that all members of a list are between 1 and 10
@@ -2635,7 +2635,7 @@ linkml.utils.ifabsent_functions.default_library:
     
     
     /**
-     * a rule for inferring a slot assignment based on evaluating a path through a sequence of slot assignemnts
+     * a rule for inferring a slot assignment based on evaluating a path through a sequence of slot assignments
      */
     path_rule?: PathExpression,
     
@@ -2752,7 +2752,7 @@ implicitly asserts Y is an instance of C2
     
     
     /**
-     * the value of the multiavlued slot is a list where all elements conform to the specified values.
+     * the value of the multivalued slot is a list where all elements conform to the specified values.
 this defines a dynamic class with named slots according to matching constraints
 
 E.g to state that all members of a list are between 1 and 10
